@@ -60,21 +60,75 @@ const BlogListCard = (props) => {
   )
 };
 
+const OptionBar = (props) => {
+
+  const {generateUrlParams} = props
+
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState("");
+  const [order, setOrder] = useState("")
+
+  useEffect(() => {
+    generateUrlParams(limit,page,sortBy,order)
+  }, [limit, page, sortBy, order])
+
+  return (
+    <div>
+      <label>Limit:</label>
+      <input type="number" value={limit} onChange={(e) => {
+        setLimit(e.target.value)
+      }}></input>
+      <br/>
+      <label>Page:</label>
+      <input type="number" value={page} onChange={(e) => {
+        setPage(e.target.value)
+      }}></input>
+      <br/>
+      <label>SortBy</label>
+      <select onChange={(e) => {
+        setSortBy(e.target.value)
+      }}>
+        <option></option>
+        <option value="id">id</option>
+        <option value="title">title</option>
+        <option value="createdAt">createdAt</option>
+      </select>
+      <br/>
+      <label>Order</label>
+      <select onChange={(e) => {
+        setOrder(e.target.value)
+      }}>
+        <option></option>
+        <option value="asc">asc</option>
+        <option value="desc">desc</option>
+      </select>
+    </div>
+  )
+};
 const App = () => {
   const copyBlogs = [...sampleBlogs]
   const [blogs, setBlogs] = useState(copyBlogs)
-  
+  const [urlParamString, setUrlParamString] = useState("")
+
   useEffect(() => {
     const fetchBlogs = async () => {
-      const result = await fetch(`${urlEndpoint}/blogs`);
+      const result = await fetch(`${urlEndpoint}/blogs/${urlParamString}`);
       const blogsData = await result.json();
       setBlogs(blogsData)
     }
     fetchBlogs()
-  }, []);
+  }, [urlParamString]);
 
+  const generateUrlParams = (limit, page, sortBy, order) => {
+    let urlParams = `?limit=${limit}&page=${page}&sortBy=${sortBy}&order=${order}`
+    setUrlParamString(urlParams)
+    return urlParamString
+  };
+  
   return (
 		<div className="App-header">
+      <OptionBar generateUrlParams={generateUrlParams}/>
       <BlogList blogs={blogs}/>
 		</div>
 	);
